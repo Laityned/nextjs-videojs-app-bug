@@ -19,7 +19,7 @@ interface PlayerProps {
  * A simple video player component for displaying videos from external websites.
  * @returns A Video.js video player element.
  */
-export function Player(props: PlayerProps) {
+export default function Player(props: PlayerProps) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {

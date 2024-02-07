@@ -1,4 +1,9 @@
-import { Player } from "../components/Player";
+// import { Player } from "../components/Player";
+
+import dynamic from "next/dynamic";
+const Player = dynamic(() => import("../components/Player"), {
+  ssr: false,
+});
 
 const videoJsOptions = {
   autoplay: true,
