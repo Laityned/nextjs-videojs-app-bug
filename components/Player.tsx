@@ -1,45 +1,57 @@
-'use client'
-
-import 'video.js/dist/video-js.css';
+"use client";
+import React from "react";
 import videojs from "video.js";
-import { useEffect, useRef } from "react";
+import "video.js/dist/video-js.css";
 
+export const Player = (props) => {
+  const videoRef = React.useRef(null);
+  const playerRef = React.useRef(null);
+  const { options, onReady } = props;
 
-interface PlayerProps {
-  muted: boolean;
-  autoplay: boolean;
-  controls: boolean;
-  sources: {
-    src: string;
-    type: string;
-  }[];
-}
+  React.useEffect(() => {
+    // Make sure Video.js player is only initialized once
+    if (!playerRef.current) {
+      // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode.
+      const videoElement = document.createElement("video-js");
 
-/**
- * A simple video player component for displaying videos from external websites.
- * @returns A Video.js video player element.
- */
-export default function Player(props: PlayerProps) {
-  const ref = useRef<HTMLVideoElement>(null);
+      videoElement.classList.add("vjs-big-play-centered");
+      videoRef.current.appendChild(videoElement);
 
-  useEffect(() => {
-    if (ref.current === null) {
-      return;
+      const player = (playerRef.current = videojs(videoElement, options, () => {
+        videojs.log("player is ready");
+        onReady && onReady(player);
+      }));
+
+      // You could update an existing player in the `else` block here
+      // on prop change, for example:
+    } else {
+      const player = playerRef.current;
+
+      player.autoplay(options.autoplay);
+      player.src(options.sources);
     }
+  }, [options, videoRef]);
 
-    const player = videojs(ref.current, props);
+  // Dispose the Video.js player when the functional component unmounts
+  React.useEffect(() => {
+    const player = playerRef.current;
 
     return () => {
-      player.dispose();
+      if (player && !player.isDisposed()) {
+        player.dispose();
+        playerRef.current = null;
+      }
     };
-  }, [props, ref]);
+  }, [playerRef]);
 
   return (
     <>
       <h1>The implementation below is using react functions</h1>
       <div data-vjs-player>
-        <video ref={ref} className="video-js" playsInline />
+        <div ref={videoRef} />
       </div>
     </>
   );
 };
+
+export default Player;
